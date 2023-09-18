@@ -1,0 +1,10 @@
+Package: refpanelutil
+Title: Utilities for LD Reference Panels in VCF or GDS format
+Version: 2023.09.18
+Authors@R: person("Paul", "Hanson", email="paulhanson2000@gmail.com", role="cre")
+Description: Stream only the parts you need from VCF reference panels on the internet, straight into the compact GDS format. Calculate LD from GDS files.
+License: 'use_mit_license()'
+Encoding: UTF-8
+Imports:
+  SNPRelate,
+  SeqArray
