@@ -1,7 +1,4 @@
 # Calculate LD from a SeqArray GDS file.
-
-# This function can accept files as input, and be run standalone on the command line:
-  # R -q -e "source(ldCalc.R); ld <- ldCalc("myfile.gds", regions="chr2:100-3000", ...)
 ldCalc <- function(gds,
                    regions=NULL, variant_ids=NULL, sample_ids=NULL,
                    ref_alleles=NULL,
@@ -10,7 +7,6 @@ ldCalc <- function(gds,
                    n_threads=parallel::detectCores(), yes_really=F) {
 
   if(class(gds) != "SeqVarGDSClass")               stop("gds is class ", class(gds), ", not SeqVarGDSClass as it should be.")
-  if(!dir.exists(dirname(output_name)))            stop("The directory of output_name ",output_name," does not exist, please create it so output can be written there.")
   if(is.null(ref_alleles) & !is.null(variant_ids)) stop("ldCalc warning: if providing variant_ids, it is highly recommended to also provide ref_alleles. If the reference alleles (i.e. non-effect alleles) in your GWAS data =/= those in the reference panel, the LD will be incorrect.")
 
   if(length( sample_ids)==1 && file.exists( sample_ids))   sample_ids <- readLines( sample_ids)
@@ -18,7 +14,8 @@ ldCalc <- function(gds,
   if(length(    regions)==1 && file.exists(    regions)) {    regions <- read.table(   regions); regions <- paste0(regions[,1],":",regions[,2],"-",regions[,3]) }
   # TODO: add GRanges support
 
-  if(anyDuplciated(seqGetData(gds,"annotation/id")) > 0) stop("Error: detected duplicates in gds file's \"annotation/id\" field.")
+  if(anyDuplicated(seqGetData(gds,"annotation/id")) > 0) stop("Error: detected duplicates in gds file's \"annotation/id\" field.")
+  if(anyDuplicated(seqGetData(gds,    "sample.id")) > 0) stop("Error: detected duplicates in gds file's \"sample.id\" field.")
   if(anyDuplicated(variant_ids)                     > 0) stop("Error: detected duplicates in variant_ids.")
   if(anyDuplicated( sample_ids)                     > 0) stop("Error: detected duplicates in sample_ids.")
 
@@ -35,13 +32,13 @@ ldCalc <- function(gds,
 
   # Filter by sample_ids
   if(!is.null(sample_ids)) {
-    message(length(sample_ids) - (seqGetData(gds,"sample.id") %in% sample_ids), "/", length(sample_ids), " sample_ids will be omitted because they were not in the gds file.")
+    message(length(sample_ids) - sum(seqGetData(gds,"sample.id") %in% sample_ids), "/", length(sample_ids), " sample_ids will be omitted because they were not in the gds file.")
     seqSetFilter(gds, sample.id = sample_ids, action="intersect")
   }
 
   # Filter by MAF/MAC/missingness
   # Note seqSetFilterCond implicitly intersects existing filters. (Interestingly seqSetFilterChrom does not.)
-  seqSetFilterCond(gds, maf=maf_thresh, mac=mac_thresh, missing_rate=variant_missingness_thresh)
+  seqSetFilterCond(gds, maf=maf_thresh, mac=mac_thresh, missing.rate=variant_missingness_thresh)
 
   # Filter by variant_ids
   if(!is.null(variant_ids)) {
