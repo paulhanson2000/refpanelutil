@@ -1,4 +1,10 @@
-importFrom(SeqArray, seqVCF2GDS)
+importFrom(SeqArray, seqOpen, seqClose, seqGetData,
+  seqSetFilter, seqSetFilterChrom, seqSetFilterCond,
+  seqFilterPush, seqFilterPop,
+  seqVCF2GDS, seqGDS2SNP)
+importFrom(SNPRelate, snpgdsOpen, snpgdsClose,
+  snpgdsAlleleSwitch, snpgdsLDMat)
+importFrom(gdsfmt, index.gdsn, read.gdsn)
 
 export(bcftoolsPipableCmd)
 export(vcfs2Gds)
