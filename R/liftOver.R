@@ -11,7 +11,17 @@ liftOver <- function(to_lift, from_build, to_build, out_file=NULL, liftover_bin=
   #' @return A BED-like data frame with lifted genome coordinates.
   #' @section Command-line use: Since this function can accept files, you could run it from the command line like so: R -q -e source("liftOver.R"); liftOver("my_file.bed", "hg19", "hg38", liftover_bin="path/to/liftOver"). At that point you should probably just use liftOver by itself though.
 
-  if(system(liftover_bin, ignore.stderr=T, ignore.stdout=T)>0) stop("Could not find liftOver at path: \"",liftover_bin,"\". Please edit the liftover_bin argument to point to your liftOver executable. You can install liftOver from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/liftOver if you don't already have it.")
+  # Find or download liftOver executable
+  if(suppressWarnings(system(liftover_bin, ignore.stderr=T, ignore.stdout=T))==127) liftover_bin <- paste0("./", liftover_bin)
+  if(suppressWarnings(system(liftover_bin, ignore.stderr=T, ignore.stdout=T))==127) {
+    message("Could not find liftOver at path: \"",liftover_bin,"\". Please edit the liftover_bin argument to point to your liftOver executable.\n(WINDOWS USERS: there is no liftOver program for Windows, so this function will not work.)")
+    yes <- "y" == readline("Automatically download liftOver from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64 and put it in the current directory? [y/n].\n")
+    if(yes) {
+      download.file("http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/liftOver", "liftOver")
+      system("chmod +x liftOver")
+      liftover_bin <- "./liftOver"
+    } else { stop("Not downloading liftOver.") }
+  }
 
   # Get chain file
   chain_file_path <- dirname(liftover_bin)
@@ -41,7 +51,7 @@ liftOver <- function(to_lift, from_build, to_build, out_file=NULL, liftover_bin=
   if(n_unmapped > 0) message(n_unmapped,"/",n_bed_rows," regions in ",to_lift," had parts which could not be liftOver'd:")
   system("cat /tmp/unmapped.tmp")
 
-  out <- read.table(out_file)
+  out <- read.table(out_file, col.names=c("chr","start","end","name"))
   if(wrote_tmp_file) unlink(to_lift)
   unlink(c("/tmp/lifted.bed", "/tmp/unmapped.tmp"))
   out
