@@ -107,9 +107,8 @@ bcftoolsPipableCmd <- function(files,
   if(!is.null(exclude_annos))
     a(" -x '", paste(collapse=',',exclude_annos), "'")
 
-  a(" -Ou | ",bcftools_bin," head")
   if(!is.null(n_records))
-    a(" -n ",n_records)
+    a(" -Ou | ",bcftools_bin," head -n ",n_records)
 
   #bcftools query
   if(!is.null(query))
