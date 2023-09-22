@@ -27,7 +27,7 @@ vcfs2Gds <- function(files, output_name,
 
   # TODO: add a "safe" option to download and convert one VCF at a time, seqMerge()ing them. This would prevent having to start completely over again if the download corrupts in one place.
 
-  f <- seqVCF2GDS(vcf_connection, output_name, storage.option="ZIP_RA", ignore.chr.prefix="")
+  f <- SeqArray::seqVCF2GDS(vcf_connection, output_name, storage.option="ZIP_RA", ignore.chr.prefix="")
   close(vcf_connection)
   unlink(c(paste0(files,".tbi"), paste0(files,".csi"))) # Index files clutter the working directory when accessing over the internet.
   

@@ -1,3 +1,5 @@
+importFrom(SeqArray, seqVCF2GDS)
+
 export(bcftoolsPipableCmd)
 export(vcfs2Gds)
 export(ldCalc)
