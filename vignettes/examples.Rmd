@@ -1,0 +1,15 @@
+---
+Title: `refpanelutil` Examples
+---
+
+```{r}
+remotes::install_github("paulhanson2000/refpanelutil", force=T)
+library(refpanelutil)
+library(SeqArray)
+library(SNPRelate)
+```
+
+```{r}
+bcftoolsPipableCmd()
+vcfs2Gds()
+```
