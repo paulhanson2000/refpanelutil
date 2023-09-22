@@ -9,7 +9,9 @@ liftOver <- function(to_lift, from_build, to_build, out_file=NULL, liftover_bin=
   #' @param out_file Desired output filename. Results are also returned as an R data.frame whether this option is given or not. 
   #' @param liftover_bin Path to the program liftOver. Can be downloaded from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/liftOver
   #' @return A BED-like data frame with lifted genome coordinates.
-  #' @section Command-line use: since this function can accept files, you could run it from the command line like so: R -q -e source("liftOver.R"); liftOver("my_file.bed", "hg19", "hg38", liftover_bin="path/to/liftOver"). At that point you should probably just use liftOver by itself though.
+  #' @section Command-line use: Since this function can accept files, you could run it from the command line like so: R -q -e source("liftOver.R"); liftOver("my_file.bed", "hg19", "hg38", liftover_bin="path/to/liftOver"). At that point you should probably just use liftOver by itself though.
+
+  if(system(liftover_bin, ignore.stderr=T, ignore.stdout=T)>0) stop("Could not find liftOver at path: \"",liftover_bin,"\". Please edit the liftover_bin argument to point to your liftOver executable. You can install liftOver from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/liftOver if you don't already have it.")
 
   # Get chain file
   chain_file_path <- dirname(liftover_bin)
