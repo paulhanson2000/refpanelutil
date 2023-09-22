@@ -11,10 +11,11 @@ ldCalc <- function(gds,
 
   if(length( sample_ids)==1 && file.exists( sample_ids))   sample_ids <- readLines( sample_ids)
   if(length(variant_ids)==1 && file.exists(variant_ids))  variant_ids <- readLines(variant_ids)
-  if(length(    regions)==1 && file.exists(    regions)) {    regions <- read.table(   regions); regions <- paste0(regions[,1],":",regions[,2],"-",regions[,3]) }
+  if(length(    regions)==1 && file.exists(    regions))      regions <- read.table(   regions)
+  if(class(regions) %in% c("data.frame", "data.table" ))      regions <- paste0(regions[,1],':',regions[,2],'-',regions[,3])
   # TODO: add GRanges support
 
-  if(anyDuplicated(seqGetData(gds,"annotation/id")) > 0) stop("Error: detected duplicates in gds file's \"annotation/id\" field.")
+  if(!is.null(variant_ids)) if(anyDuplicated(seqGetData(gds,"annotation/id")) > 0) stop("Error: detected duplicates in gds file's \"annotation/id\" field.")
   if(anyDuplicated(seqGetData(gds,    "sample.id")) > 0) stop("Error: detected duplicates in gds file's \"sample.id\" field.")
   if(anyDuplicated(variant_ids)                     > 0) stop("Error: detected duplicates in variant_ids.")
   if(anyDuplicated( sample_ids)                     > 0) stop("Error: detected duplicates in sample_ids.")
@@ -24,9 +25,9 @@ ldCalc <- function(gds,
 
   # Filter by regions
   if(!is.null(regions)) {
-    chrs <- sub("chr","",strsplit(regions, ":|-")[[1]][1])
-    begs <-   as.numeric(strsplit(regions, ":|-")[[1]][2])
-    ends <-   as.numeric(strsplit(regions, ":|-")[[1]][3])
+    chrs <-            sapply(regions, function(reg) strsplit(reg,":|-")[[1]])[1,]
+    begs <- as.numeric(sapply(regions, function(reg) strsplit(reg,":|-")[[1]])[2,])
+    ends <- as.numeric(sapply(regions, function(reg) strsplit(reg,":|-")[[1]])[3,])
     seqSetFilterChrom(gds, chrs, from.bp=begs, to.bp=ends, intersect=T)
   }
 
@@ -62,7 +63,7 @@ ldCalc <- function(gds,
       if(n_variants > 20000 && !yes_really) stop("You're about to compute an LD matrix for ", n_variants, " variants, are you sure? Run ldCalc again with yes_really=TRUE if so.") # TODO: estimate final file size for style poitns
 
       # Allele switching
-      if(!is.null(ref_alleles)) {
+      if(!is.null(ref_alleles) & !is.null(variant_ids)) {
         # Given IDs/alleles and those in the GDS file not in same order. Match the ref alleles to match the GDS file.
         ref_alleles <- ref_alleles[match(snpgdsGetData(snpgds,"snp.rs.id"), variant_ids)]
         snpgdsAlleleSwitch(snpgds, toupper(ref_alleles))
@@ -70,7 +71,19 @@ ldCalc <- function(gds,
 
       # LD
       ld <- snpgdsLDMat(snpgds, slide=slide, method=method, num.thread=n_threads)
-      colnames(ld$LD) <- snpgdsGetData(snpgds, "snp.rs.id") # Not actually necessarily rs IDs. "snp.rs.id" is just what "annotation/id" becomes after SeqArray -> SNP GDS conversion.
+
+      # If user filtered using variant_ids, they probably want IDs as the colnames. Otherwise, chr:pos:ref:alt.
+      if(!is.null(variant_ids)) {
+        colnames(ld$LD) <- snpgdsGetData(snpgds, "snp.rs.id") # Not actually necessarily rs IDs. "snp.rs.id" is just what "annotation/id" becomes after SeqArray -> SNP GDS conversion.
+      } else {
+        colnames(ld$LD) <- mapply( USE.NAMES=F,
+          snpgdsGetData(snpgds, "snp.chromosome"),
+          snpgdsGetData(snpgds, "snp.position"),
+          strsplit(snpgdsGetData(snpgds, "snp.allele"),'/'),
+          FUN = function(chr,pos,alleles) paste0(chr,':',pos,':',alleles[[1]],':',alleles[[2]])
+        )
+      }
+      
     },
 
     error = function(err) {

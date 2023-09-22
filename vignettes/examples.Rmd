@@ -1,15 +1,63 @@
 ---
-Title: `refpanelutil` Examples
+Title: "refpanelutil Examples"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+  toc: true
+  keep_md: true
+vignette: >
+  %\VignetteIndexEntry{refpanelutil Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r}
-remotes::install_github("paulhanson2000/refpanelutil", force=T)
+remotes::install_github("paulhanson2000/refpanelutil")
 library(refpanelutil)
-library(SeqArray)
-library(SNPRelate)
 ```
 
+# Example Data
 ```{r}
-bcftoolsPipableCmd()
-vcfs2Gds()
+# chr, start, end must be the first 3 columns, in that order.
+hg19_loci <- data.frame(
+    chr=c( "chr2" , "chr7"  ),
+  start=c(27720940,130247914),
+    end=c(27740940,130557914),
+   name=c( "GCKR" , "KLF14" ))
+```
+
+# Liftover
+```{r}
+hg38_loci <- liftOver(hg19_loci, from_build="hg19", to_build="hg38")
+```
+
+# `bcftools` Wrapper
+```{r}
+bcftools_cmd <- bcftoolsPipableCmd(files = hg19_1kg_phase3_vcf_urls[c(2,7)],
+                                   regions = hg19_loci,
+                                   n_records = 10,
+                                   chr_nm_map = ucsc_human_chr_nm_map)
+```
+
+# Convert VCFs to GDS
+```{r}
+vcfs2Gds(files = hg19_1kg_phase3_vcf_urls[c(2,7)],
+         output_name = "my_gds.gds",
+         regions = hg19_loci,
+         chr_nm_map = ucsc_human_chr_nm_map)
+
+gds <- SeqArray::seqOpen("my_gds.gds")
+```
+
+# LD
+```{r}
+ld <- ldCalc(gds, regions = hg19_loci)
+ld2 <- ldCalc(gds, regions = c("chr2:27730000-27740000",
+                              "chr2:27700000-27710000"))
+
+
+sample_info <- read.table("http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v3.20130502.ALL.panel", header=T)
+sas_sample_ids <- sample_info$sample[sample_info$super_pop == "SAS"]
+
+ld_sas <- ldCalc(gds, regions = hg19_loci, sample_ids = sas_sample_ids)
 ```
