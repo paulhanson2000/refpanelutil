@@ -2,3 +2,7 @@ export(bcftoolsPipableCmd)
 export(vcfs2Gds)
 export(ldCalc)
 export(liftOver)
+
+export(hg19_1kg_phase3_vcf_urls)
+export(hg38_1kg_30x_vcf_urls)
+export(hg38_gnomad_1kg_hgdp_vcf_urls)
