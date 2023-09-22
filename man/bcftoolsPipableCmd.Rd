@@ -11,6 +11,7 @@ bcftoolsPipableCmd(
   regions = NULL,
   variant_ids = NULL,
   sample_ids = NULL,
+  n_records = NULL,
   query = NULL,
   chr_nm_map = NULL,
   exclude_annos = NULL,
@@ -31,6 +32,8 @@ bcftoolsPipableCmd(
 \item{variant_ids}{Character vector of variant IDs, to subset the VCF/BCF(s) by.}
 
 \item{sample_ids}{Character vector of sample IDs, to subset the VCF/BCF(s) by.}
+
+\item{n_records}{number of variant records (rows) to display.}
 
 \item{query}{<TODO document me>}
 

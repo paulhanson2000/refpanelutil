@@ -1,7 +1,7 @@
 bcftoolsPipableCmd <- function(files,
                                output_name=NULL, output_type=NULL,
                                regions=NULL, variant_ids=NULL, sample_ids=NULL,
-                               query=NULL,
+                               n_records=NULL, query=NULL, 
                                chr_nm_map=NULL, exclude_annos=NULL, extra_cmds=NULL,
                                scratch_dir="/tmp", bcftools_bin="bcftools") {
   #' bcftoolsPipableCmd
@@ -14,6 +14,7 @@ bcftoolsPipableCmd <- function(files,
   #' @param regions data.frame of bed-like format (1st column chromosome, 2nd start position (0-indexed), 3rd end, other cols unused)
   #' @param variant_ids Character vector of variant IDs, to subset the VCF/BCF(s) by.
   #' @param sample_ids Character vector of sample IDs, to subset the VCF/BCF(s) by.
+  #' @param n_records number of variant records (rows) to display.
   #' @param query <TODO document me>
   #' @param chr_nm_map data.frame with two columns. Used to convert the VCF files' chromosome/contig names from the names in the first column to the second. E.g. to convert from "chr1" to "1". You can assume this name mapping is applied before the VCF is subset by regions and/or variant_ids.
   #' @param info_fields <TODO> Character vector of INFO fields to keep, e.g. c("AC","AF","AN"). If left NULL, all fields are gotten.
@@ -105,6 +106,10 @@ bcftoolsPipableCmd <- function(files,
     a(" --rename-chrs ",chr_nm_map_fnm)
   if(!is.null(exclude_annos))
     a(" -x '", paste(collapse=',',exclude_annos), "'")
+
+  a(" -Ou | ",bcftools_bin," head")
+  if(!is.null(n_records))
+    a(" -n ",n_records)
 
   #bcftools query
   if(!is.null(query))
