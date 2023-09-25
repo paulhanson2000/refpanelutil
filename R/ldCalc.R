@@ -5,6 +5,22 @@ ldCalc <- function(gds,
                    maf_thresh=NaN, mac_thresh=1L, variant_missingness_thresh=NaN,
                    slide=0, method="corr",
                    n_threads=parallel::detectCores(), yes_really=F) {
+  #' ldCalc
+  #'
+  #' Calculate LD from `SeqArray` GDS files.
+  #'
+  #' @param gds A `SeqArray` GDS file handle (obtained from `seqOpen("example.gds")`)
+  #' @param regions Character vector of regions of the format chr:start-end, or a data.frame of bed-like format (1st column chromosome, 2nd start position (0-indexed), 3rd end, other cols unused)
+  #' @param variant_ids Character vector of variant IDs. If given, the resulting LD matrix's colnames will be variant IDs. Otherwise, the colnames will be of the format chr:pos:ref:alt.
+  #' @param sample_ids Character vector of sample IDs, to subset the VCF/BCF(s) by.
+  #' @param ref_alleles Character vector of variant reference alleles corresponding to variant_ids.
+  #' @param maf_thresh MAF threshold
+  #' @param mac_thresh MAC threshold
+  #' @param variant_missingness Missingness threshold
+  #' @param slide Size of sliding window. Full LD matrix will be computed by default.
+  #' @param method Measure of LD to use. "corr" by default, referring to Pearson r. See `?snpgdsLDMat` from the `SNPRelate` package for more details.
+  #' @param n_threads Number of threads for parallel processing.
+  #' @param yes_really Safety measure. LD for a large number of variants can consume a lot of hard drive space. If calculating LD for a very large number of variants (>20k), pass yes_really=T to confirm you wish to do this.
 
   if(class(gds) != "SeqVarGDSClass")               stop("gds is class ", class(gds), ", not SeqVarGDSClass as it should be.")
   if(is.null(ref_alleles) & !is.null(variant_ids)) stop("ldCalc warning: if providing variant_ids, it is highly recommended to also provide ref_alleles. If the reference alleles (i.e. non-effect alleles) in your GWAS data =/= those in the reference panel, the LD will be incorrect.")

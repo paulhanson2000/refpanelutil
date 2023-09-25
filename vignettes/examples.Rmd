@@ -1,17 +1,18 @@
 ---
-Title: "refpanelutil Examples"
+title: "refpanelutil Examples"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
   toc: true
   keep_md: true
+urlcolor: blue
 vignette: >
   %\VignetteIndexEntry{refpanelutil Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r}
+```{r, results='hide', message=F, warning=F}
 remotes::install_github("paulhanson2000/refpanelutil")
 library(refpanelutil)
 ```
@@ -27,20 +28,38 @@ hg19_loci <- data.frame(
 ```
 
 # Liftover
+`liftOver()` function automatically downloads chain files from [UCSC's server](https://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/), so long as the given genome names can be found on the server. (It could even be used for different species.)\
+If the `liftOver` program is not given in the `liftover_bin` argument, the function will ask to download it.
 ```{r}
 hg38_loci <- liftOver(hg19_loci, from_build="hg19", to_build="hg38")
 ```
+To conveniently apply liftOver to a [`.bed`](http://www.genome.ucsc.edu/FAQ/FAQformat.html#format1) file, one could do: `liftOver(read.table("myfile.bed"), ...)`
 
 # `bcftools` Wrapper
-```{r}
+`bcftoolsPipableCmd()` generates single command made of a chain of `bcftools` commands. Because it is a single command, it can be easily piped.\
+Some of the most useful features include:\
+
+* Concatenating files if multiple filenames/URLs are given (assuming the files are compatible, i.e. same samples but split by chromosome).
+* Filtering by regions and/or variant IDs and/or sample IDs
+* Passing a map of chromosome names to handle multiple naming conventions (e.g. to handle different naming schemes like "chrM", "chrMT", "M", etc.).
+* And more; see `?bcftoolsPipableCmd` for details.
+
+The file URLs of a few publicly available reference panels can be found in the following convenient variables:\
+
+* `hg19_1kg_phase3_vcf_urls`: 1000 Genomes Project (phase 3, from 2013) ([site](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/))
+* `hg38_1kg_30x_vcf_urls`: 1000 Genomes Project (new 30x coverage version, from 2022) ([site](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/))
+* `hg39_gnomad_1kg_hgdp_vcf_urls`: gnomAD 3.1.2 1000 Genomes + Human Genome Diversity Project subset ([site](https://gnomad.broadinstitute.org/downloads#v3-hgdp-1kg))
+```{r, message=F}
 bcftools_cmd <- bcftoolsPipableCmd(files = hg19_1kg_phase3_vcf_urls[c(2,7)],
                                    regions = hg19_loci,
                                    n_records = 10,
                                    chr_nm_map = ucsc_human_chr_nm_map)
+bcftools_cmd
 ```
 
-# Convert VCFs to GDS
-```{r}
+# Filter and Convert Multiple VCFs to GDS
+`vcfs2Gds()` is an extension of `SeqArray`'s `seqVCF2GDS()` function, using `bcftoolsPipableCmd()` under the hood to bring VCF filtering and conversion together in one function, without needing to write any intermediate files. Most function arguments are the same as `bcftoolsPipableCmd()`.
+```{r, results='hide', message=F}
 vcfs2Gds(files = hg19_1kg_phase3_vcf_urls[c(2,7)],
          output_name = "my_gds.gds",
          regions = hg19_loci,
@@ -50,14 +69,29 @@ gds <- SeqArray::seqOpen("my_gds.gds")
 ```
 
 # LD
-```{r}
+`ldCalc()` takes a `SeqArray` `.gds` file handle (obtained with `seqOpen("example.gds")`) and computes LD.\ `regions` may be given in different formats.\
+If `variant_ids` and `ref_alleles` arguments are given, allele switching will be performed.\
+```{r, results='hide', message=F, warning=F}
 ld <- ldCalc(gds, regions = hg19_loci)
+
+
 ld2 <- ldCalc(gds, regions = c("chr2:27730000-27740000",
-                              "chr2:27700000-27710000"))
+                               "chr2:27700000-27710000"))
 
 
 sample_info <- read.table("http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v3.20130502.ALL.panel", header=T)
 sas_sample_ids <- sample_info$sample[sample_info$super_pop == "SAS"]
 
 ld_sas <- ldCalc(gds, regions = hg19_loci, sample_ids = sas_sample_ids)
+```
+```{r, echo=F}
+SeqArray::seqClose(gds)
+```
+```{r}
+ld_sas[1:4,1:4]
+```
+
+# Session Info
+```{r}
+sessionInfo()
 ```
