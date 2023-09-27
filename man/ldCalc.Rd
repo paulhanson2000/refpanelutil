@@ -22,7 +22,7 @@ ldCalc(
 \arguments{
 \item{gds}{A `SeqArray` GDS file handle (obtained from `seqOpen("example.gds")`)}
 
-\item{regions}{data.frame of bed-like format (1st column chromosome, 2nd start position (0-indexed), 3rd end, other cols unused)}
+\item{regions}{Character vector of regions of the format chr:start-end, or a data.frame of bed-like format (1st column chromosome, 2nd start position (0-indexed), 3rd end, other cols unused)}
 
 \item{variant_ids}{Character vector of variant IDs. If given, the resulting LD matrix's colnames will be variant IDs. Otherwise, the colnames will be of the format chr:pos:ref:alt.}
 

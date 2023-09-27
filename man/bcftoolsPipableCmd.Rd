@@ -35,7 +35,7 @@ bcftoolsPipableCmd(
 
 \item{n_records}{number of variant records (rows) to display.}
 
-\item{query}{<TODO document me>}
+\item{query}{Enter a bcftools query-formatting string. Example: "%ID\t%CHROM\t%POS". For more details see https://samtools.github.io/bcftools/bcftools.html#query.}
 
 \item{chr_nm_map}{data.frame with two columns. Used to convert the VCF files' chromosome/contig names from the names in the first column to the second. E.g. to convert from "chr1" to "1". You can assume this name mapping is applied before the VCF is subset by regions and/or variant_ids.}
 
