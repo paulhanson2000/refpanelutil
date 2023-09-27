@@ -51,7 +51,9 @@ liftOver <- function(to_lift, from_build, to_build, out_file=NULL, liftover_bin=
   if(n_unmapped > 0) message(n_unmapped,"/",n_bed_rows," regions in ",to_lift," had parts which could not be liftOver'd:")
   system("cat /tmp/unmapped.tmp")
 
-  out <- read.table(out_file, col.names=c("chr","start","end","name"))
+  bed_format_cols <- c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "thickStart", "thickEnd", "itemRgb", "blockCount", "blockSizes", "blockStarts") # See http://www.genome.ucsc.edu/FAQ/FAQformat.html#format1
+  out <- read.table(out_file)
+  colnames(out) <- bed_format_cols[ncol(out)]
   if(wrote_tmp_file) unlink(to_lift)
   unlink(c("/tmp/lifted.bed", "/tmp/unmapped.tmp"))
   out
