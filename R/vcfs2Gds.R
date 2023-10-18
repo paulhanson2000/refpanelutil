@@ -29,7 +29,7 @@ vcfs2Gds <- function(files, output_name,
 
   f <- SeqArray::seqVCF2GDS(vcf_connection, output_name, storage.option="ZIP_RA", ignore.chr.prefix="")
   close(vcf_connection)
-  unlink(c(paste0(files,".tbi"), paste0(files,".csi"))) # Index files clutter the working directory when accessing over the internet.
+  unlink(c(paste0(basename(files),".tbi"), paste0(basename(files),".csi"))) # Index files clutter the working directory when accessing over the internet.
   
   # TODO: Commented out b/c it takes really long and ZIP is small enough.
   #seqRecompress(f, "LZMA") # See ?seqRecompress -- seqVCF2GDS uses a LOT of memory when given a high compression option. Better to use a low compression, and then recompress later.
