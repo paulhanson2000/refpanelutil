@@ -15,7 +15,7 @@ bcftoolsPipableCmd <- function(files,
   #' @param variant_ids Character vector of variant IDs, to subset the VCF/BCF(s) by.
   #' @param sample_ids Character vector of sample IDs, to subset the VCF/BCF(s) by.
   #' @param n_records number of variant records (rows) to display.
-  #' @param query Enter a bcftools query-formatting string. Example: "%ID\t%CHROM\t%POS". For more details see https://samtools.github.io/bcftools/bcftools.html#query.
+  #' @param query Enter a bcftools query-formatting string. Example: "\%ID\t\%CHROM\t\%POS". For more details see https://samtools.github.io/bcftools/bcftools.html#query.
   #' @param chr_nm_map data.frame with two columns. Used to convert the VCF files' chromosome/contig names from the names in the first column to the second. E.g. to convert from "chr1" to "1". You can assume this name mapping is applied before the VCF is subset by regions and/or variant_ids.
   #' @param info_fields <TODO> Character vector of INFO fields to keep, e.g. c("AC","AF","AN"). If left NULL, all fields are gotten.
   #' @param format_fields <TODO> Character vector of FORMAT fields to keep, e.g. c("GT","DP"). If left NULL, all fields are gotten.
