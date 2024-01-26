@@ -15,7 +15,7 @@ liftOver <- function(to_lift, from_build, to_build, out_file=NULL, liftover_bin=
   if(suppressWarnings(system(liftover_bin, ignore.stderr=T, ignore.stdout=T))==127) liftover_bin <- paste0("./", liftover_bin)
   if(suppressWarnings(system(liftover_bin, ignore.stderr=T, ignore.stdout=T))==127) {
     message("Could not find liftOver at path: \"",liftover_bin,"\". Please edit the liftover_bin argument to point to your liftOver executable.\n(WINDOWS USERS: there is no liftOver program for Windows, so this function will not work.)")
-    yes <- "y" == readline("Automatically download liftOver from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64 and put it in the current directory? [y/n].\n")
+    yes <- "y" == readline("Automatically download liftOver (for Linux) from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64 and put it in the current directory? [y/n].\n")
     if(yes) {
       download.file("http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/liftOver", "liftOver")
       system("chmod +x liftOver")
